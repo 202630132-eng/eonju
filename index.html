@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>조은아침</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Pretendard', '맑은 고딕', sans-serif;
+        }
+        body {
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        header {
+            text-align: center;
+            padding: 20px 0;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+            margin: 0 0 10px 0;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            flex: 1;
+            min-width: 300px;
+        }
+        h2 {
+            font-size: 1.2rem;
+            color: #34495e;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        
+        /* 교탁 및 좌석 스타일 */
+        .blackboard {
+            background: #27ae60;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-weight: bold;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+        .seat-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr); /* 5열 기준 (필요시 수정 가능) */
+            gap: 10px;
+        }
+        .seat {
+            background: #e9ecef;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px 5px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .seat:hover {
+            background: #d0ebff;
+            border-color: #74c0fc;
+        }
+        .seat.selected {
+            background: #339af0;
+            color: white;
+            border-color: #1c7ed6;
+        }
+
+        /* 시간표 작성 스타일 */
+        .timetable-selects {
+            display: grid;
+            gap: 10px;
+        }
+        .period-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .period-row label {
+            width: 60px;
+            font-weight: bold;
+        }
+        select {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #ced4da;
+            font-size: 14px;
+        }
+        
+        /* 안내 문구 및 결과 출력 */
+        .info-box {
+            background: #e7f5ff;
+            border-left: 4px solid #339af0;
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background: #339af0;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        .submit-btn:hover {
+            background: #1c7ed6;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>☀️ 조은아침</h1>
+        <p>자신의 자리를 선택하고 오늘의 시간표를 작성해 주세요.</p>
+    </header>
+
+    <div class="container">
+        <!-- 좌석 선택 영역 -->
+        <div class="card">
+            <h2>1. 내 자리 선택하기</h2>
+            <div class="blackboard">칠 판 (앞)</div>
+            <div class="seat-grid" id="seatGrid">
+                <!-- 자바스크립트로 좌석이 자동 생성됩니다 -->
+            </div>
+        </div>
+
+        <!-- 시간표 작성 영역 -->
+        <div class="card">
+            <h2>2. 오늘 시간표 작성하기</h2>
+            <div class="info-box">
+                각 교시별 수업 과목을 선택해 주세요.
+            </div>
+            <form id="timetableForm">
+                <div class="timetable-selects" id="timetableSelects">
+                    <!-- 자바스크립트로 교시별 선택창이 생성됩니다 -->
+                </div>
+                <button type="button" class="submit-btn" onclick="saveData()">입력 완료</button>
+            </form>
+
+            <div class="result" id="resultArea">
+                <h3>📌 선택 결과 Confirmation</h3>
+                <p id="selectedSeatResult">선택한 자리: 없음</p>
+                <p><strong>오늘의 시간표:</strong></p>
+                <ul id="selectedSubjectsResult"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 과목 목록 (요청하신 과목 그대로 적용)
+        const subjects = ["기술", "한문", "영어", "창체", "미술", "과학", "국어", "사회", "가정", "수학", "역사", "체육", "스클"];
+        
+        let selectedSeatNum = null;
+        const totalSeats = 25; // 기본 25석 설정 (필요시 숫자를 변경하세요)
+        const totalPeriods = 6; // 기본 6교시 설정 (필요시 숫자를 변경하세요)
+
+        // 1. 좌석 생성
+        const seatGrid = document.getElementById('seatGrid');
+        for (let i = 1; i <= totalSeats; i++) {
+            const seat = document.createElement('div');
+            seat.classList.add('seat');
+            seat.innerText = i + '번';
+            seat.onclick = () => selectSeat(seat, i);
+            seatGrid.appendChild(seat);
+        }
+
+        function selectSeat(element, seatNum) {
+            const seats = document.querySelectorAll('.seat');
+            seats.forEach(s => s.classList.remove('selected'));
+            element.classList.add('selected');
+            selectedSeatNum = seatNum;
+        }
+
+        // 2. 시간표 드롭다운 생성
+        const timetableSelects = document.getElementById('timetableSelects');
+        for (let i = 1; i <= totalPeriods; i++) {
+            const row = document.createElement('div');
+            row.classList.add('period-row');
+            
+            const label = document.createElement('label');
+            label.innerText = i + '교시';
+            
+            const select = document.createElement('select');
+            select.id = `period-${i}`;
+            
+            // 기본 옵션
+            const defaultOption = document.createElement('option');
+            defaultOption.value = "";
+            defaultOption.innerText = "과목 선택";
+            select.appendChild(defaultOption);
+
+            // 과목 옵션 추가
+            subjects.forEach(sub => {
+                const opt = document.createElement('option');
+                opt.value = sub;
+                opt.innerText = sub;
+                select.appendChild(opt);
+            });
+
+            row.appendChild(label);
+            row.appendChild(select);
+            timetableSelects.appendChild(row);
+        }
+
+        // 3. 완료 버튼 클릭 시 결과 표시
+        function saveData() {
+            if (!selectedSeatNum) {
+                alert('자리를 먼저 선택해 주세요!');
+                return;
+            }
+
+            const resultsList = document.getElementById('selectedSubjectsResult');
+            resultsList.innerHTML = '';
+
+            let isAllSelected = true;
+            for (let i = 1; i <= totalPeriods; i++) {
+                const val = document.getElementById(`period-${i}`).value;
+                if (!val) {
+                    isAllSelected = false;
+                }
+                const li = document.createElement('li');
+                li.innerText = `${i}교시: ${val || '미선택'}`;
+                resultsList.appendChild(li);
+            }
+
+            if (!isAllSelected) {
+                alert('모든 교시의 과목을 선택해 주세요.');
+                return;
+            }
+
+            document.getElementById('selectedSeatResult').innerText = `선택한 자리: ${selectedSeatNum}번`;
+            document.getElementById('resultArea').style.display = 'block';
+            alert('성공적으로 저장되었습니다!');
+        }
+    </script>
+</body>
+</html>
