@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수행평가 완료!</title>
+    <!-- FullCalendar CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #FFFFFF;
+            --text-color: #000000;
+            --button-bg: #FFD600;
+            --button-hover: #E6C200;
+            --border-color: #000000;
+            --card-bg: #FFFFFF;
+        }
+
+        body.theme-neo {
+            --bg-color: #FFFFFF;
+            --button-bg: #FFD600;
+            --border-color: #000000;
+            --card-bg: #FFFFFF;
+        }
+
+        body.theme-soft {
+            --bg-color: #FFFDE7;
+            --button-bg: #FFE082;
+            --border-color: #424242;
+            --card-bg: #FFFFFF;
+        }
+
+        body.theme-lavender {
+            --bg-color: #F3E5F5;
+            --button-bg: #FFD600;
+            --border-color: #212121;
+            --card-bg: #FFFFFF;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: var(--text-color);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            transition: background 0.3s ease;
+        }
+
+        header {
+            background-color: #FFFFFF;
+            padding: 1.2rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid var(--border-color);
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .theme-select {
+            padding: 0.5rem 0.8rem;
+            font-weight: bold;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: #FFFFFF;
+            cursor: pointer;
+            box-shadow: 2px 2px 0px var(--border-color);
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            margin: 2rem auto;
+            padding: 0 1rem;
+            flex: 1;
+        }
+
+        .page-section {
+            display: none;
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 2.5rem;
+            border: 3px solid var(--border-color);
+            box-shadow: 5px 5px 0px var(--border-color);
+            animation: fadeIn 0.2s ease-in-out;
+        }
+
+        .page-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 입체적 3D 노란색 버튼 스타일 */
+        .btn {
+            background-color: var(--button-bg);
+            color: #000000;
+            padding: 0.82rem 1.8rem;
+            font-size: 1rem;
+            border: 3px solid var(--border-color);
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            box-shadow: 4px 4px 0px #000000;
+            transition: all 0.15s ease-in-out;
+            position: relative;
+        }
+
+        .btn:hover {
+            background-color: var(--button-hover);
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px #000000;
+        }
+
+        .btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px #000000;
+        }
+
+        /* 이전 노란색 버튼 전용 스타일 */
+        .btn-prev {
+            background-color: #FFD600;
+            margin-bottom: 1.5rem;
+        }
+
+        .home-hero {
+            text-align: center;
+            padding: 2rem 1rem;
+        }
+
+        .home-hero h2 {
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+            font-weight: 800;
+        }
+
+        .home-hero p {
+            font-size: 1.1rem;
+            margin-bottom: 2.5rem;
+            line-height: 1.6;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .upload-area {
+            border: 3px dashed var(--border-color);
+            border-radius: 12px;
+            padding: 3.5rem 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            background-color: #FAFAFA;
+            margin-top: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 4px 4px 0px var(--border-color);
+        }
+
+        .upload-area:hover {
+            background-color: #FFFDE7;
+        }
+
+        .upload-icon {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .preview-image {
+            max-width: 100%;
+            max-height: 250px;
+            margin-top: 1rem;
+            border-radius: 8px;
+            border: 3px solid var(--border-color);
+            display: none;
+        }
+
+        .scan-beam {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 5px;
+            background-color: #FFD600;
+            box-shadow: 0 0 10px #FFD600;
+            display: none;
+            animation: scan 1.5s infinite linear;
+        }
+
+        @keyframes scan {
+            0% { top: 0%; }
+            50% { top: 95%; }
+            100% { top: 0%; }
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 1.5rem;
+        }
+
+        .spinner {
+            border: 4px solid #F3F3F3;
+            border-top: 4px solid #000000;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #calendar {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        .fc {
+            --fc-border-color: #000000;
+            --fc-button-bg-color: #FFD600;
+            --fc-button-text-color: #000000;
+            --fc-button-hover-bg-color: #E6C200;
+        }
+
+        .fc-button {
+            border: 3px solid #000000 !important;
+            font-weight: 800 !important;
+            box-shadow: 3px 3px 0px #000000 !important;
+            border-radius: 8px !important;
+        }
+
+        .fc-event {
+            cursor: pointer;
+            border: 2px solid #000000 !important;
+            color: #000000 !important;
+            font-weight: 800;
+            padding: 3px 6px;
+            box-shadow: 2px 2px 0px #000000;
+        }
+
+        .notification-banner {
+            background-color: #FFFDE7;
+            border: 3px solid var(--border-color);
+            padding: 1.2rem;
+            margin-bottom: 1.5rem;
+            border-radius: 10px;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 4px 4px 0px var(--border-color);
+        }
+
+        .notification-banner.active {
+            display: flex;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: #FFFFFF;
+            border: 3px solid #000000;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+            box-shadow: 6px 6px 0px #000000;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px; right: 20px;
+            font-size: 1.8rem;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .modal-body p {
+            margin-bottom: 0.8rem;
+            line-height: 1.6;
+            font-size: 1.05rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1><i class="fa-solid fa-square-check"></i> 수행평가 완료!</h1>
+        <div class="header-controls">
+            <select class="theme-select" onchange="changeTheme(this.value)">
+                <option value="theme-neo">테마: 클래식 화이트</option>
+                <option value="theme-soft">테마: 파스텔 노랑</option>
+                <option value="theme-lavender">테마: 소프트 라벤더</option>
+            </select>
+            <button class="btn" style="padding: 0.5rem 1rem; font-size: 0.9rem;" onclick="showPage('page-home')">
+                <i class="fa-solid fa-house"></i> 홈으로
+            </button>
+        </div>
+    </header>
+
+    <div class="container">
+        <section id="page-home" class="page-section active">
+            <div class="home-hero">
+                <h2>수행평가 일정, 이미지 한 장으로 자동 관리!</h2>
+                <p>알림장이나 안내문 사진을 올리면 AI가 알아서 일정과 준비물을 캘린더에 등록합니다.<br>D-3 알림부터 D-Day 준비 안내까지 똑똑하게 챙겨드려요.</p>
+                <div class="btn-group">
+                    <button class="btn" onclick="showPage('page-upload')">
+                        <i class="fa-solid fa-upload"></i> 시작하기 (이미지 등록)
+                    </button>
+                    <button class="btn" onclick="showPage('page-calendar')">
+                        <i class="fa-solid fa-calendar-days"></i> 캘린더 보러가기
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="page-upload" class="page-section">
+            <button class="btn btn-prev" onclick="showPage('page-home')">
+                <i class="fa-solid fa-arrow-left"></i> 이전
+            </button>
+            
+            <h2><i class="fa-solid fa-image"></i> 수행평가 이미지 삽입</h2>
+            <p style="margin-top: 5px;">갤러리에서 수행평가 이름, 일정, 과목, 내용이 적힌 사진을 선택하세요.</p>
+
+            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                <div id="scanBeam" class="scan-beam"></div>
+                <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+                <h3>이미지를 삽입해 주세요</h3>
+                <p style="font-size: 0.9rem; margin-top: 5px;">클릭하여 갤러리 또는 파일 선택</p>
+                <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                <img id="imagePreview" class="preview-image" alt="선택한 이미지 미리보기">
+            </div>
+
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p><strong>AI가 이미지에서 수행평가 정보를 분석하고 있습니다...</strong></p>
+            </div>
+        </section>
+
+        <section id="page-calendar" class="page-section">
+            <button class="btn btn-prev" onclick="showPage('page-home')">
+                <i class="fa-solid fa-arrow-left"></i> 이전
+            </button>
+
+            <div id="notificationBanner" class="notification-banner">
+                <div>
+                    <i class="fa-solid fa-bell" style="margin-right: 8px; font-size: 1.2rem;"></i>
+                    <strong id="notifTitle">알림</strong>
+                    <span id="notifText" style="margin-left: 5px;"></span>
+                </div>
+                <button class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.85rem;" onclick="goToNotifDate()">
+                    해당 일자로 이동 <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 10px;">
+                <h2><i class="fa-regular fa-calendar-check"></i> 나의 수행평가 캘린더</h2>
+                <button class="btn" style="padding: 0.5rem 1rem; font-size: 0.9rem;" onclick="showPage('page-upload')">
+                    <i class="fa-solid fa-plus"></i> 일정 추가하기
+                </button>
+            </div>
+
+            <div id="calendar"></div>
+        </section>
+    </div>
+
+    <div id="eventModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h3 id="modalSubject" style="margin-bottom: 15px; font-size: 1.4rem;"></h3>
+            <div class="modal-body">
+                <p><strong>📌 수행평가명:</strong> <span id="modalTitle"></span></p>
+                <p><strong>📅 예정일:</strong> <span id="modalDate"></span></p>
+                <p><strong>📝 내용:</strong> <span id="modalContent"></span></p>
+                <p><strong>🎒 준비물:</strong> <span id="modalSupplies"></span></p>
+            </div>
+            <div style="text-align: right; margin-top: 1.5rem;">
+                <button class="btn" onclick="closeModal()">확인</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let calendar;
+        let eventsList = [];
+        let activeNotifTargetDate = null;
+
+        function changeTheme(themeClass) {
+            document.body.className = themeClass;
+        }
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page-section').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageId).classList.add('active');
+
+            if (pageId === 'page-calendar') {
+                setTimeout(() => {
+                    if (!calendar) {
+                        initCalendar();
+                    } else {
+                        calendar.render();
+                    }
+                    checkUpcomingNotifications();
+                }, 100);
+            }
+        }
+
+        function initCalendar() {
+            const calendarEl = document.getElementById('calendar');
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'ko',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek'
+                },
+                events: eventsList,
+                eventClick: function(info) {
+                    showEventDetail(info.event);
+                }
+            });
+            calendar.render();
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const preview = document.getElementById('imagePreview');
+            const scanBeam = document.getElementById('scanBeam');
+            
+            preview.src = URL.createObjectURL(file);
+            preview.style.display = 'block';
+            scanBeam.style.display = 'block';
+            document.getElementById('loading').style.display = 'block';
+
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                scanBeam.style.display = 'none';
+
+                const fileName = file.name.toLowerCase();
+                const isInvalidTest = fileName.includes('cat') || fileName.includes('dog') || fileName.includes('invalid');
+
+                if (isInvalidTest) {
+                    alert("⚠️ 맞는 이미지가 아닙니다.\n수행평가의 과목, 일정, 내용이 명시된 이미지를 선택해 주세요.");
+                    preview.style.display = 'none';
+                    event.target.value = '';
+                } else {
+                    let subject = "과학";
+                    let title = "실험 보고서 작성 및 발표";
+                    
+                    if(fileName.includes('math') || fileName.includes('수학')) {
+                        subject = "수학";
+                        title = "이차함수 활용 문제 풀이";
+                    } else if(fileName.includes('english') || fileName.includes('영어')) {
+                        subject = "영어";
+                        title = "영작문 및 스피치 평가";
+                    }
+
+                    const targetDate = new Date();
+                    targetDate.setDate(targetDate.getDate() + 2);
+                    const formattedDate = targetDate.toISOString().split('T')[0];
+
+                    const newEvent = {
+                        id: String(Date.now()),
+                        title: `[${subject}] ${title}`,
+                        start: formattedDate,
+                        backgroundColor: '#FFD600',
+                        borderColor: '#000000',
+                        textColor: '#000000',
+                        extendedProps: {
+                            subject: subject,
+                            assessmentName: title,
+                            content: "단원별 개념 정리 보고서 제출 및 관련 문제 심화 풀이 평가",
+                            supplies: "교재, 컴퓨터/태블릿, 필기도구"
+                        }
+                    };
+
+                    eventsList.push(newEvent);
+                    if (calendar) {
+                        calendar.addEvent(newEvent);
+                    }
+
+                    alert(`✅ 수행평가 정보가 캘린더에 성공적으로 저장되었습니다!\n\n- 과목: ${subject}\n- 일정: ${formattedDate}\n- 평가명: ${title}`);
+
+                    preview.style.display = 'none';
+                    event.target.value = '';
+                    showPage('page-calendar');
+                }
+            }, 1500);
+        }
+
+        function showEventDetail(eventObj) {
+            const props = eventObj.extendedProps;
+            document.getElementById('modalSubject').innerText = `[${props.subject || '과목'}] 수행평가 상세`;
+            document.getElementById('modalTitle').innerText = props.assessmentName || eventObj.title;
+            document.getElementById('modalDate').innerText = eventObj.startStr;
+            document.getElementById('modalContent').innerText = props.content || '내용 없음';
+            document.getElementById('modalSupplies').innerText = props.supplies || '없음';
+
+            document.getElementById('eventModal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('eventModal').style.display = 'none';
+        }
+
+        function checkUpcomingNotifications() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            let activeAlert = null;
+
+            eventsList.forEach(event => {
+                const eventDate = new Date(event.start);
+                eventDate.setHours(0, 0, 0, 0);
+
+                const diffTime = eventDate - today;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                if (diffDays > 0 && diffDays <= 3) {
+                    activeAlert = {
+                        title: `[D-${diffDays} 알림]`,
+                        text: `${event.extendedProps.subject} 수행평가가 ${diffDays}일 후 예정되어 있습니다.`,
+                        targetDate: event.start
+                    };
+                } else if (diffDays === 0) {
+                    activeAlert = {
+                        title: `[D-Day 오늘 알림]`,
+                        text: `오늘은 ${event.extendedProps.subject} 수행평가 날입니다. 준비하셨나요? 🎒`,
+                        targetDate: event.start
+                    };
+                }
+            });
+
+            const banner = document.getElementById('notificationBanner');
+            if (activeAlert) {
+                document.getElementById('notifTitle').innerText = activeAlert.title;
+                document.getElementById('notifText').innerText = activeAlert.text;
+                activeNotifTargetDate = activeAlert.targetDate;
+                banner.classList.add('active');
+            } else {
+                banner.classList.remove('active');
+            }
+        }
+
+        function goToNotifDate() {
+            if (calendar && activeNotifTargetDate) {
+                calendar.gotoDate(activeNotifTargetDate);
+            }
+        }
+    </script>
+</body>
+</html>
