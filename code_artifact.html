@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>수행평가 완료!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- FullCalendar CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Pretendard', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* 3D Tactile Button Base Styles */
+        .btn-3d-yellow {
+            background-color: #FFD600;
+            color: #111827;
+            border: 3px solid #000000;
+            box-shadow: 4px 4px 0px #000000;
+            font-weight: 800;
+            border-radius: 12px;
+            transition: all 0.1s ease;
+        }
+
+        .btn-3d-yellow:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px #000000;
+            background-color: #FFE500;
+        }
+
+        .btn-3d-yellow:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px #000000;
+        }
+
+        .btn-3d-gray {
+            background-color: #E5E7EB;
+            color: #111827;
+            border: 3px solid #000000;
+            box-shadow: 4px 4px 0px #000000;
+            font-weight: 700;
+            border-radius: 12px;
+            transition: all 0.1s ease;
+        }
+
+        .btn-3d-gray:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px #000000;
+            background-color: #F3F4F6;
+        }
+
+        .btn-3d-gray:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px #000000;
+        }
+
+        .card-3d {
+            border: 3px solid #000000;
+            box-shadow: 6px 6px 0px #000000;
+            border-radius: 16px;
+        }
+
+        /* Themes */
+        .theme-white {
+            background-color: #F9FAFB;
+            color: #1F2937;
+        }
+
+        .theme-yellow {
+            background-color: #FFFDF0;
+            color: #1F2937;
+        }
+
+        .theme-lavender {
+            background-color: #F5F3FF;
+            color: #1F2937;
+        }
+
+        /* FullCalendar Customization */
+        .fc {
+            --fc-border-color: #000000;
+            --fc-button-text-color: #111827;
+            --fc-button-bg-color: #FFD600;
+            --fc-button-border-color: #000000;
+            --fc-button-hover-bg-color: #FFE500;
+            --fc-button-hover-border-color: #000000;
+            --fc-button-active-bg-color: #E6C200;
+            --fc-button-active-border-color: #000000;
+        }
+
+        .fc .fc-toolbar-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+        }
+
+        .fc .fc-button {
+            border: 2px solid #000000 !important;
+            box-shadow: 2px 2px 0px #000000 !important;
+            font-weight: 700 !important;
+            border-radius: 8px !important;
+            text-transform: none !important;
+        }
+
+        .fc-theme-standard td, .fc-theme-standard th {
+            border: 2px solid #000000 !important;
+        }
+
+        .fc-event {
+            border: 2px solid #000000 !important;
+            border-radius: 6px !important;
+            padding: 2px 4px !important;
+            font-weight: 700 !important;
+            cursor: pointer;
+            box-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="theme-white min-h-screen pb-12 transition-colors duration-300">
+
+    <header class="border-b-4 border-black bg-white sticky top-0 z-30 px-4 py-3 shadow-md">
+        <div class="max-w-6xl mx-auto flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-[#FFD600] border-2 border-black rounded-xl flex items-center justify-center text-xl font-black shadow-[2px_2px_0px_#000]">
+                    📝
+                </div>
+                <h1 class="text-2xl font-extrabold tracking-tight">수행평가 완료!</h1>
+            </div>
+
+            <!-- Controls: API Key, Theme Select -->
+            <div class="flex items-center gap-2 sm:gap-4 flex-wrap">
+                <!-- Theme Selector -->
+                <select id="themeSelect" onchange="changeTheme(this.value)" class="bg-white border-2 border-black rounded-lg px-3 py-1.5 font-bold text-sm shadow-[2px_2px_0px_#000] outline-none cursor-pointer">
+                    <option value="white">⚪ 클래식 화이트</option>
+                    <option value="yellow">💛 파스텔 노랑</option>
+                    <option value="lavender">💜 소프트 라벤더</option>
+                </select>
+
+                <!-- Gemini API Key Button -->
+                <button onclick="openApiKeyModal()" class="btn-3d-yellow px-3 py-1.5 text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-[#000] fa-key"></i>
+                    <span id="apiKeyBtnText">API 키 설정</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 pt-6">
+
+        <section id="alertBanner" class="hidden mb-6 card-3d bg-amber-100 p-4 border-black">
+            <div class="flex items-start gap-3">
+                <span class="text-2xl">⚠️</span>
+                <div class="flex-1">
+                    <h2 class="font-extrabold text-lg text-amber-900 mb-1">다가오는 수행평가 알림!</h2>
+                    <ul id="alertList" class="space-y-1 text-sm font-bold text-amber-800">
+                        <!-- Dynamic items -->
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- Left Panel: Add New Task & Upload -->
+            <div class="space-y-6">
+                <!-- OCR Upload Card -->
+                <div class="card-3d bg-white p-5">
+                    <h2 class="text-xl font-black mb-3 flex items-center gap-2">
+                        <span>📸</span> AI 알림장/수행평가 스캔
+                    </h2>
+                    <p class="text-xs text-gray-600 mb-4 font-semibold">
+                        사진을 올리면 Gemini 2.5 Flash가 과목, 과제명, 제출일, 준비물을 자동으로 정리해 드려요!
+                    </p>
+
+                    <div class="border-3 border-dashed border-black rounded-xl p-6 text-center bg-yellow-50/50 hover:bg-yellow-100/50 transition cursor-pointer" onclick="document.getElementById('imageInput').click()">
+                        <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+                        <div id="uploadPlaceholder">
+                            <i class="fa-solid fa-cloud-arrow-up text-4xl text-amber-500 mb-2"></i>
+                            <p class="font-extrabold text-sm">이미지 업로드하기</p>
+                            <p class="text-xs text-gray-500 mt-1">클릭하거나 이미지 파일 선택</p>
+                        </div>
+                        <div id="uploadPreviewContainer" class="hidden">
+                            <img id="uploadPreview" class="max-h-48 mx-auto rounded-lg border-2 border-black object-contain mb-2" alt="미리보기">
+                            <p id="fileNameText" class="text-xs font-bold text-gray-700 truncate"></p>
+                        </div>
+                    </div>
+
+                    <button id="analyzeBtn" onclick="analyzeImageWithGemini()" class="btn-3d-yellow w-full py-3 mt-4 text-base flex items-center justify-center gap-2" disabled>
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <span>AI 분석 시작하기</span>
+                    </button>
+                </div>
+
+                <!-- Manual Add Card -->
+                <div class="card-3d bg-white p-5">
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="text-lg font-black flex items-center gap-2">
+                            <span>✏️</span> 직접 추가하기
+                        </h2>
+                    </div>
+                    <button onclick="openEditModal(null, true)" class="btn-3d-gray w-full py-2.5 text-sm flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>새 수행평가 일정 입력</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Panel: FullCalendar -->
+            <div class="lg:col-span-2">
+                <div class="card-3d bg-white p-5">
+                    <div id="calendar"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+
+    <!-- API Key Settings Modal -->
+    <div id="apiKeyModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="card-3d bg-white max-w-md w-full p-6 relative">
+            <h3 class="text-xl font-black mb-2 flex items-center gap-2">
+                🔑 Gemini API 키 설정
+            </h3>
+            <p class="text-xs text-gray-600 font-semibold mb-4">
+                수행평가 이미지 분석(OCR)을 위해 Google Gemini API 키가 필요합니다. 키는 브라우저에만 안전하게 저장됩니다.
+            </p>
+
+            <div class="mb-4">
+                <label class="block text-xs font-extrabold mb-1">Gemini API Key</label>
+                <input type="password" id="apiKeyInput" placeholder="AIzaSy..." class="w-full border-2 border-black rounded-lg p-2.5 font-mono text-sm outline-none focus:ring-2 focus:ring-yellow-400">
+            </div>
+
+            <div class="flex justify-end gap-3">
+                <button onclick="closeApiKeyModal()" class="btn-3d-gray px-4 py-2 text-sm">취소</button>
+                <button onclick="saveApiKey()" class="btn-3d-yellow px-5 py-2 text-sm">저장하기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Review / Edit Task Modal -->
+    <div id="editModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="card-3d bg-white max-w-xl w-full p-6 relative my-8">
+            <h3 id="editModalTitle" class="text-xl font-black mb-4 flex items-center gap-2">
+                🤖 AI 분석 결과 검토 및 수정
+            </h3>
+
+            <form id="taskForm" onsubmit="saveTask(event)" class="space-y-4">
+                <input type="hidden" id="taskId">
+                <input type="hidden" id="taskImageBase64">
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-extrabold mb-1">과목 *</label>
+                        <input type="text" id="taskSubject" required placeholder="예: 국어, 수학, 과학" class="w-full border-2 border-black rounded-lg p-2 font-bold text-sm outline-none focus:bg-yellow-50">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-extrabold mb-1">제출/평가일 *</label>
+                        <input type="date" id="taskDueDate" required class="w-full border-2 border-black rounded-lg p-2 font-bold text-sm outline-none focus:bg-yellow-50">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold mb-1">수행평가 제목 *</label>
+                    <input type="text" id="taskTitle" required placeholder="예: 단원평가, 서술형 작성 등" class="w-full border-2 border-black rounded-lg p-2 font-bold text-sm outline-none focus:bg-yellow-50">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold mb-1">준비물 및 제출 형태</label>
+                    <input type="text" id="taskSupplies" placeholder="예: 필기도구, A4 용지, 보고서 파일" class="w-full border-2 border-black rounded-lg p-2 font-bold text-sm outline-none focus:bg-yellow-50">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-extrabold mb-1">내용 요약 및 핵심 정보</label>
+                    <textarea id="taskSummary" rows="3" placeholder="평가 주요 내용 및 유의사항 요약" class="w-full border-2 border-black rounded-lg p-2 font-medium text-sm outline-none focus:bg-yellow-50 resize-none"></textarea>
+                </div>
+
+                <!-- Attached Image Preview in Modal -->
+                <div id="modalImagePreviewBox" class="hidden border-2 border-black rounded-lg p-2 bg-gray-50">
+                    <p class="text-xs font-extrabold mb-1">첨부 원본 사진</p>
+                    <img id="modalImagePreview" class="max-h-40 mx-auto rounded border border-black object-contain" alt="첨부 이미지">
+                </div>
+
+                <div class="flex justify-between items-center pt-2">
+                    <!-- Left: Yellow "Back" button -->
+                    <button type="button" onclick="closeEditModal()" class="btn-3d-yellow px-4 py-2 text-sm flex items-center gap-1">
+                        <i class="fa-solid fa-arrow-left"></i> 이전
+                    </button>
+
+                    <div class="flex gap-2">
+                        <button type="button" id="deleteBtn" onclick="deleteTask()" class="btn-3d-gray px-4 py-2 text-sm bg-red-100 hover:bg-red-200 border-red-900 text-red-900 hidden">삭제</button>
+                        <button type="submit" class="btn-3d-yellow px-6 py-2 text-sm">일정 등록/저장</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Task Detail View Modal -->
+    <div id="detailModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="card-3d bg-white max-w-lg w-full p-6 relative my-8">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <span id="detailSubjectTag" class="px-2.5 py-1 bg-yellow-300 border-2 border-black rounded-md text-xs font-black mr-2">과목</span>
+                    <span id="detailDueDate" class="text-xs font-extrabold text-gray-600">2026-09-29</span>
+                    <h3 id="detailTitle" class="text-2xl font-black mt-2">수행평가 제목</h3>
+                </div>
+                <button onclick="closeDetailModal()" class="text-xl font-bold px-2 py-1">✕</button>
+            </div>
+
+            <div class="space-y-4 text-sm font-medium border-t-2 border-black pt-4">
+                <div>
+                    <p class="text-xs font-extrabold text-gray-500 mb-1">🎒 준비물</p>
+                    <p id="detailSupplies" class="bg-gray-100 p-2.5 rounded-lg border border-black font-bold text-gray-800">-</p>
+                </div>
+
+                <div>
+                    <p class="text-xs font-extrabold text-gray-500 mb-1">📋 AI 요약 및 내용</p>
+                    <p id="detailSummary" class="bg-gray-100 p-3 rounded-lg border border-black text-gray-800 whitespace-pre-line leading-relaxed">-</p>
+                </div>
+
+                <div id="detailImageBox" class="hidden">
+                    <p class="text-xs font-extrabold text-gray-500 mb-1">📸 첨부된 알림장/과제 사진</p>
+                    <div class="border-2 border-black rounded-lg overflow-hidden bg-black/5">
+                        <img id="detailImage" class="w-full max-h-64 object-contain mx-auto" alt="수행평가 이미지">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center mt-6 pt-4 border-t-2 border-black">
+                <button onclick="closeDetailModal()" class="btn-3d-yellow px-4 py-2 text-sm flex items-center gap-1">
+                    <i class="fa-solid fa-arrow-left"></i> 이전
+                </button>
+                <button onclick="editFromDetail()" class="btn-3d-gray px-5 py-2 text-sm">
+                    ✏️ 수정하기
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // App State
+        let calendar = null;
+        let tasks = [];
+        let selectedImageData = null; // Base64 string
+        let currentDetailTaskId = null;
+
+        // Initialize on DOM Ready
+        document.addEventListener('DOMContentLoaded', () => {
+            loadTasks();
+            initCalendar();
+            checkApiKeyStatus();
+            updateAlertBanner();
+            loadSavedTheme();
+        });
+
+        // --- Theme Selector Logic ---
+        function changeTheme(theme) {
+            document.body.classList.remove('theme-white', 'theme-yellow', 'theme-lavender');
+            document.body.classList.add(`theme-${theme}`);
+            localStorage.setItem('selectedTheme', theme);
+        }
+
+        function loadSavedTheme() {
+            const savedTheme = localStorage.getItem('selectedTheme') || 'white';
+            document.getElementById('themeSelect').value = savedTheme;
+            changeTheme(savedTheme);
+        }
+
+        // --- API Key Management ---
+        function getApiKey() {
+            return localStorage.getItem('gemini_api_key') || '';
+        }
+
+        function checkApiKeyStatus() {
+            const apiKey = getApiKey();
+            const btnText = document.getElementById('apiKeyBtnText');
+            if (apiKey) {
+                btnText.innerText = 'API 키 설정됨 ✅';
+            } else {
+                btnText.innerText = 'API 키 설정';
+            }
+        }
+
+        function openApiKeyModal() {
+            document.getElementById('apiKeyInput').value = getApiKey();
+            document.getElementById('apiKeyModal').classList.remove('hidden');
+        }
+
+        function closeApiKeyModal() {
+            document.getElementById('apiKeyModal').classList.add('hidden');
+        }
+
+        function saveApiKey() {
+            const key = document.getElementById('apiKeyInput').value.trim();
+            if (key) {
+                localStorage.setItem('gemini_api_key', key);
+                alert('API 키가 안전하게 저장되었습니다.');
+            } else {
+                localStorage.removeItem('gemini_api_key');
+                alert('API 키가 삭제되었습니다.');
+            }
+            checkApiKeyStatus();
+            closeApiKeyModal();
+        }
+
+        // --- Image Handling ---
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                selectedImageData = e.target.result; // Data URL (Base64)
+                
+                // Show Preview
+                document.getElementById('uploadPlaceholder').classList.add('hidden');
+                document.getElementById('uploadPreviewContainer').classList.remove('hidden');
+                document.getElementById('uploadPreview').src = selectedImageData;
+                document.getElementById('fileNameText').innerText = file.name;
+                
+                document.getElementById('analyzeBtn').disabled = false;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // --- Gemini 2.5 Flash Vision OCR Integration ---
+        async function analyzeImageWithGemini() {
+            const apiKey = getApiKey();
+            if (!apiKey) {
+                alert('Gemini API 키가 필요합니다. 우측 상단의 "API 키 설정" 버튼을 눌러 키를 입력해 주세요.');
+                openApiKeyModal();
+                return;
+            }
+
+            if (!selectedImageData) {
+                alert('분석할 이미지를 먼저 선택해 주세요.');
+                return;
+            }
+
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const originalBtnContent = analyzeBtn.innerHTML;
+            
+            try {
+                // UI Loading State
+                analyzeBtn.disabled = true;
+                analyzeBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Gemini API 분석 중...`;
+
+                // Prepare Base64 payload
+                const base64Content = selectedImageData.split(',')[1];
+                const mimeType = selectedImageData.substring(
+                    selectedImageData.indexOf(":") + 1, 
+                    selectedImageData.indexOf(";")
+                );
+
+                const prompt = `Analyze this homework/evaluation notice image. Extract information into structured JSON.
+Return JSON with keys:
+"subject": string (e.g. "국어", "수학", "과학", "사회", "영어"),
+"title": string (concise task title),
+"dueDate": string (format YYYY-MM-DD. Use year 2026 if not specified),
+"supplies": string (required materials or preparation items),
+"summary": string (brief summary of task details and rules)
+
+Ensure response is valid strictly formatted JSON without codeblock wrapping.`;
+
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+
+                const payload = {
+                    contents: [
+                        {
+                            role: 'user',
+                            parts: [
+                                { text: prompt },
+                                {
+                                    inlineData: {
+                                        mimeType: mimeType,
+                                        data: base64Content
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    generationConfig: {
+                        responseMimeType: "application/json"
+                    }
+                };
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errText = await response.text();
+                    throw new Error(`API 호출 실패 (${response.status}): ${errText}`);
+                }
+
+                const data = await response.json();
+                const jsonText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                if (!jsonText) {
+                    throw new Error("Gemini 응답에서 결과를 찾을 수 없습니다.");
+                }
+
+                const result = JSON.parse(jsonText);
+
+                // Open Modal with Extracted Data for User Review & Editing
+                openEditModal({
+                    subject: result.subject || '기타',
+                    title: result.title || '수행평가',
+                    dueDate: result.dueDate || new Date().toISOString().split('T')[0],
+                    supplies: result.supplies || '',
+                    summary: result.summary || '',
+                    imageBase64: selectedImageData
+                }, false);
+
+            } catch (error) {
+                console.error('Gemini OCR Error:', error);
+                alert(`AI 분석 오류: ${error.message}`);
+            } finally {
+                analyzeBtn.disabled = false;
+                analyzeBtn.innerHTML = originalBtnContent;
+            }
+        }
+
+        // --- Task CRUD and Modal Handlers ---
+        function openEditModal(taskData = null, isManual = false) {
+            document.getElementById('taskForm').reset();
+            
+            if (isManual) {
+                document.getElementById('editModalTitle').innerText = "✏️ 새 수행평가 작성";
+                document.getElementById('taskId').value = "";
+                document.getElementById('taskDueDate').value = new Date().toISOString().split('T')[0];
+                document.getElementById('modalImagePreviewBox').classList.add('hidden');
+                document.getElementById('taskImageBase64').value = "";
+                document.getElementById('deleteBtn').classList.add('hidden');
+            } else if (taskData) {
+                document.getElementById('editModalTitle').innerText = taskData.id ? "✏️ 수행평가 수정" : "🤖 AI 분석 결과 검토 및 수정";
+                document.getElementById('taskId').value = taskData.id || "";
+                document.getElementById('taskSubject').value = taskData.subject || "";
+                document.getElementById('taskTitle').value = taskData.title || "";
+                document.getElementById('taskDueDate').value = taskData.dueDate || new Date().toISOString().split('T')[0];
+                document.getElementById('taskSupplies').value = taskData.supplies || "";
+                document.getElementById('taskSummary').value = taskData.summary || "";
+                
+                const imgData = taskData.imageBase64 || taskData.image || "";
+                document.getElementById('taskImageBase64').value = imgData;
+
+                if (imgData) {
+                    document.getElementById('modalImagePreviewBox').classList.remove('hidden');
+                    document.getElementById('modalImagePreview').src = imgData;
+                } else {
+                    document.getElementById('modalImagePreviewBox').classList.add('hidden');
+                }
+
+                if (taskData.id) {
+                    document.getElementById('deleteBtn').classList.remove('hidden');
+                } else {
+                    document.getElementById('deleteBtn').classList.add('hidden');
+                }
+            }
+
+            document.getElementById('editModal').classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.add('hidden');
+        }
+
+        function saveTask(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('taskId').value || 'task_' + Date.now();
+            const subject = document.getElementById('taskSubject').value.trim();
+            const title = document.getElementById('taskTitle').value.trim();
+            const dueDate = document.getElementById('taskDueDate').value;
+            const supplies = document.getElementById('taskSupplies').value.trim();
+            const summary = document.getElementById('taskSummary').value.trim();
+            const imageBase64 = document.getElementById('taskImageBase64').value;
+
+            const existingIndex = tasks.findIndex(t => t.id === id);
+            const newTaskObj = {
+                id,
+                subject,
+                title,
+                dueDate,
+                supplies,
+                summary,
+                image: imageBase64
+            };
+
+            if (existingIndex > -1) {
+                tasks[existingIndex] = newTaskObj;
+            } else {
+                tasks.push(newTaskObj);
+            }
+
+            localStorage.setItem('performance_tasks', JSON.stringify(tasks));
+            
+            // Refresh Calendar & Banner
+            refreshCalendarEvents();
+            updateAlertBanner();
+
+            closeEditModal();
+            
+            // Reset upload UI
+            selectedImageData = null;
+            document.getElementById('imageInput').value = '';
+            document.getElementById('uploadPlaceholder').classList.remove('hidden');
+            document.getElementById('uploadPreviewContainer').classList.add('hidden');
+            document.getElementById('analyzeBtn').disabled = true;
+
+            alert('수행평가 일정이 성공적으로 저장되었습니다!');
+        }
+
+        function deleteTask() {
+            const id = document.getElementById('taskId').value;
+            if (!id) return;
+
+            if (confirm('이 일정을 삭제하시겠습니까?')) {
+                tasks = tasks.filter(t => t.id !== id);
+                localStorage.setItem('performance_tasks', JSON.stringify(tasks));
+                refreshCalendarEvents();
+                updateAlertBanner();
+                closeEditModal();
+            }
+        }
+
+        function loadTasks() {
+            const stored = localStorage.getItem('performance_tasks');
+            if (stored) {
+                try {
+                    tasks = JSON.parse(stored);
+                } catch (e) {
+                    tasks = [];
+                }
+            } else {
+                // Sample initial data if empty
+                tasks = [
+                    {
+                        id: 'sample_1',
+                        subject: '국어',
+                        title: '현대시 비평문 작성',
+                        dueDate: '2026-09-29',
+                        supplies: '원고지, 필기도구',
+                        summary: '수업 시간에 다룬 현대시 중 한 편을 골라 800자 내외의 비평문 작성.',
+                        image: ''
+                    }
+                ];
+                localStorage.setItem('performance_tasks', JSON.stringify(tasks));
+            }
+        }
+
+        // --- Detail Modal ---
+        function openDetailModal(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+
+            currentDetailTaskId = taskId;
+
+            document.getElementById('detailSubjectTag').innerText = task.subject || '기타';
+            document.getElementById('detailDueDate').innerText = task.dueDate;
+            document.getElementById('detailTitle').innerText = task.title;
+            document.getElementById('detailSupplies').innerText = task.supplies || '없음';
+            document.getElementById('detailSummary').innerText = task.summary || '내용 없음';
+
+            if (task.image) {
+                document.getElementById('detailImageBox').classList.remove('hidden');
+                document.getElementById('detailImage').src = task.image;
+            } else {
+                document.getElementById('detailImageBox').classList.add('hidden');
+            }
+
+            document.getElementById('detailModal').classList.remove('hidden');
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detailModal').classList.add('hidden');
+            currentDetailTaskId = null;
+        }
+
+        function editFromDetail() {
+            if (!currentDetailTaskId) return;
+            const task = tasks.find(t => t.id === currentDetailTaskId);
+            closeDetailModal();
+            if (task) {
+                openEditModal(task, false);
+            }
+        }
+
+        // --- FullCalendar Setup ---
+        function initCalendar() {
+            const calendarEl = document.getElementById('calendar');
+            calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'ko',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,listWeek'
+                },
+                buttonText: {
+                    today: '오늘',
+                    month: '월',
+                    list: '목록'
+                },
+                events: formatTasksForCalendar(),
+                eventClick: function(info) {
+                    openDetailModal(info.event.id);
+                },
+                height: 'auto'
+            });
+            calendar.render();
+        }
+
+        function formatTasksForCalendar() {
+            const colors = {
+                '국어': '#FFADAD',
+                '수학': '#FFD6A5',
+                '영어': '#FDFFB6',
+                '과학': '#CAFFBF',
+                '사회': '#9BF6FF',
+                '기타': '#E1BEE7'
+            };
+
+            return tasks.map(t => ({
+                id: t.id,
+                title: `[${t.subject}] ${t.title}`,
+                start: t.dueDate,
+                backgroundColor: colors[t.subject] || '#FFD600',
+                textColor: '#000000',
+                borderColor: '#000000'
+            }));
+        }
+
+        function refreshCalendarEvents() {
+            if (calendar) {
+                calendar.removeAllEvents();
+                calendar.addEventSource(formatTasksForCalendar());
+            }
+        }
+
+        // --- Alert Banner (D-Day Notification) ---
+        function updateAlertBanner() {
+            const alertBanner = document.getElementById('alertBanner');
+            const alertList = document.getElementById('alertList');
+            alertList.innerHTML = '';
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const urgentTasks = tasks.map(t => {
+                const due = new Date(t.dueDate);
+                due.setHours(0, 0, 0, 0);
+                const diffTime = due - today;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                return { ...t, diffDays };
+            }).filter(t => t.diffDays >= 0 && t.diffDays <= 3)
+              .sort((a, b) => a.diffDays - b.diffDays);
+
+            if (urgentTasks.length > 0) {
+                urgentTasks.forEach(t => {
+                    const li = document.createElement('li');
+                    const dDayText = t.diffDays === 0 ? 'D-Day' : `D-${t.diffDays}`;
+                    li.innerHTML = `<span class="bg-red-500 text-white px-2 py-0.5 rounded-md text-xs font-black mr-2">${dDayText}</span> [${t.subject}] ${t.title} (${t.dueDate})`;
+                    alertList.appendChild(li);
+                });
+                alertBanner.classList.remove('hidden');
+            } else {
+                alertBanner.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
